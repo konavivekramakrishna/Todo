@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo-Manager</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    async function checkhandle(id, status) {
+        console.log("Function called with ID:", id, "and status:", status);
+        try {
+          const response = await fetch(`/todos/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ completed: status }),
+          });
+      
+          if (response.ok) {
+            console.log("Todo item updated successfully");
+            window.location.reload();
+          } else {
+            console.error("Failed to update todo item");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      async function deletehandle(id) {
+        console.log("Function called with ID:", id, "and status:", status);
+        try {
+          const response = await fetch(`/todos/${id}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+      
+          if (response.ok) {
+            console.log("Todo item deleted successfully");
+            window.location.reload();
+          } else {
+            console.error("Failed to delete todo item");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+</script>      
+</head>
+<body>
+    <div class="grid grid-cols-6">
+        <div class="col-start-3 col-span-2">
+            <%- include('header.ejs') %>
+            <p class="py-2">Welcome to the To-do Todo-Manager</p>
+            <p class="py-2">New here?<a href="/signup" class="text-green-600">sign-up now</a></p>
+            <p class="py-2">Already have an account? <a href="/login" class="text-green-600">Sign-in</a></p>
+    <%- include("footer.ejs") %>
+</body>
+</html>

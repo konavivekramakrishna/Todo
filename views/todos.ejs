@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo-Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script>
+    async function checkhandle(id, status) {
+        console.log("Function called with ID:", id, "and status:", status);
+        try {
+          const response = await fetch(`/todos/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ completed: status }),
+          });
+      
+          if (response.ok) {
+            console.log("Todo item updated successfully");
+            window.location.reload();
+          } else {
+            console.error("Failed to update todo item");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+      async function deletehandle(id) {
+    console.log("Function called with ID:", id);
+    try {
+        const response = await fetch(`/todos/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.ok) {
+            console.log("Todo item deleted successfully");
+            window.location.reload();
+        } else {
+            console.error("Failed to delete todo item");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+</script>      
+</head>
+<body style="margin: 5rem;">
+<%- include("header.ejs") %>
+<a href="/signout">signout</a>
+<form action="/todos" method="post">
+    <div class="flex gap-2 py-4">
+        <div class="flex-auto">
+            <input type="text" name="title" placeholder="What's next?" required  class="border border-gray-300 text-gray-900 w-full p-2 text-sm">
+        </div>
+        <div class="flex-auto">
+            <input type="date" name="dueDate" required class="border border-gray-300 text-gray-900 w-full p-2 text-sm leading-4">
+        </div>
+        <div class="flex-auto">
+            <button type="submit" class="bg-green-600 text-white px-5 py-1.5 rounded font-medium mr-2 mb-2">Add</button>
+        </div>
+    </div>
+  </form>
+  <%- include('notifications.ejs') %>
+  <%- include("todo.ejs") %>
+
+<%- include("footer.ejs") %>
+
+</body>
+</html>
