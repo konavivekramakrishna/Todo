@@ -1,9 +1,9 @@
 name: CI/CD
 on: push
 env:
-  PG_DATABASE: wd-todo-test
-  PG_USER: postgres
-  PG_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  PG_DATABASE: "wd-todo-test"
+  PG_USER: "postgres"
+  PG_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
 jobs:
   run-tests:
     runs-on: ubuntu-latest
@@ -12,9 +12,9 @@ jobs:
       postgres:
         image: postgres:11.7
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: wd-todo-test
+          POSTGRES_USER: "postgres"
+          POSTGRES_PASSWORD: "postgres"
+          POSTGRES_DB: "wd-todo-test"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -50,55 +50,37 @@ jobs:
   deploy:
     needs: run-tests
     runs-on: ubuntu-latest
-    if: ${{ needs.run-tests.result == 'success' }}
+    if: needs.run-tests.result == 'success'
 
     steps:
       - name: Deploy to production
         uses: johnbeynon/render-deploy-action@v0.0.8
         with:
-          service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
-          api-key: ${{ secrets.MY_RENDER_API_KEY }}
+          service-id: "${{ secrets.MY_RENDER_SERVICE_ID }}"
+          api-key: "${{ secrets.MY_RENDER_API_KEY }}"
 
   notify:
     runs-on: ubuntu-latest
-    if: ${{ always() }}
+    if: always()
     steps:
       - name: Send Slack notification on success
-        if: ${{ needs.run-tests.result == 'success' && needs.deploy.result == 'success' }}
+        if: needs.run-tests.result == 'success' && needs.deploy.result == 'success'
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          payload: |
+          payload: >
             {
-              "text": "CI/CD process succeeded!",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "All tests and deployment were successful."
-                  }
-                }
-              ]
+              "text": "CI/CD process succeeded! All tests and deployment were successful" 
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
 
       - name: Send Slack notification on failure
-        if: ${{ needs.run-tests.result != 'success' || needs.deploy.result != 'success' }}
+        if: needs.run-tests.result != 'success' || needs.deploy.result != 'success'
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          payload: |
+          payload: >
             {
-              "text": "CI/CD process failed!",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "There was a failure in the CI/CD process. Check the workflow for details.\n\nFailed Tests: ${{ needs.run-tests.outputs.test-results-url }}\nFailed Deployment: ${{ needs.deploy.outputs.deployment-url }}"
-                  }
-                }
-              ]
+              "text": "CI/CD process failed! There was a failure in the CI/CD process. Check the workflow for details.\n\nFailed Tests: ${{ needs.run-tests.outputs.test-results-url }}\nFailed Deployment: ${{ needs.deploy.outputs.deployment-url }}"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
