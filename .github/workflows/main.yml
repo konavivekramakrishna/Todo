@@ -5,23 +5,16 @@ env:
   PG_USER: postgres
   PG_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 jobs:
-  # Label of the container job
   run-tests:
-    # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
 
-    # Service containers to run with `container-job`
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
         image: postgres:11.7
-        # Provide the password for postgres
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: wd-todo-test
-        # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -31,21 +24,18 @@ jobs:
           - 5432:5432
 
     steps:
-      # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
         uses: actions/checkout@v3
 
-      # Performs a clean installation of all dependencies in the `package.json` file
-      # For more information, see https://docs.npmjs.com/cli/ci.html
       - name: Install dependencies
         run: npm ci
 
       - name: Run unit tests
         run: npm test
+
       - name: Run the app
         id: run-app
         run: |
-          npm install
           npx sequelize-cli db:drop
           npx sequelize-cli db:create
           npx sequelize-cli db:migrate
@@ -56,6 +46,7 @@ jobs:
         run: |
           npm install cypress cypress-json-results
           npx cypress run
+
   deploy:
     needs: run-tests
     runs-on: ubuntu-latest
@@ -67,3 +58,49 @@ jobs:
         with:
           service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
           api-key: ${{ secrets.MY_RENDER_API_KEY }}
+
+  notify:
+    needs: [run-tests, deploy]
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+
+    steps:
+      - name: Send Slack notification on success
+        if: ${{ needs.run-tests.result == 'success' && needs.deploy.result == 'success' }}
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": "CI/CD process succeeded!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "All tests and deployment were successful."
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send Slack notification on failure
+        if: ${{ needs.run-tests.result != 'success' || needs.deploy.result != 'success' }}
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": "CI/CD process failed!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "There was a failure in the CI/CD process. Check the workflow for details.\n\nFailed Tests: ${{ steps.run-tests.outputs.test-results-url }}\nFailed Deployment: ${{ steps.deploy.outputs.deployment-url }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
