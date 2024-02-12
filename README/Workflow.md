@@ -4,7 +4,7 @@ This GitHub Actions workflow automates the Continuous Integration (CI) and Conti
 
 ## Purpose
 
-The purpose of this workflow is to ensure the reliability and stability of the application by automatically running tests on every push to the repository. It also automates the deployment process to production and notifies relevant stakeholders via Slack about the outcome of the CI/CD pipeline.
+The purpose of this workflow is to ensure the reliability and stability of the application by automatically running tests on every push to the repository. It also automates the deployment process to production and notifies relevant stakeholders via Slack about the outcome of the CI/CD pipeline
 
 ## Usage
 
