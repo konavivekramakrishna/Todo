@@ -1,27 +1,21 @@
-name: Auto test L10 solution
-on: push
-env:
-  PG_DATABASE: wd-todo-test
-  PG_USER: postgres
-  PG_PASSWORD: postgres
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
-  # Label of the container job
   run-tests:
-    # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
 
-    # Service containers to run with `container-job`
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
         image: postgres:11.7
-        # Provide the password for postgres
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: wd-todo-test
-        # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -31,17 +25,16 @@ jobs:
           - 5432:5432
 
     steps:
-      # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
         uses: actions/checkout@v3
 
-      # Performs a clean installation of all dependencies in the `package.json` file
-      # For more information, see https://docs.npmjs.com/cli/ci.html
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies and run tests
+        run: |
+          npm ci
+          npm test
+          npm install cypress cypress-json-results
+          npx cypress run
 
-      - name: Run unit tests
-        run: npm test
       - name: Run the app
         id: run-app
         run: |
@@ -52,7 +45,14 @@ jobs:
           PORT=3000 npm start &
           sleep 5
 
-      - name: Run integration tests
-        run: |
-          npm install cypress cypress-json-results
-          npx cypress run
+  deploy:
+    needs: run-tests
+    runs-on: ubuntu-latest
+    if: ${{ needs.run-tests.result == 'success' }}
+
+    steps:
+      - name: Deploy to production
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.MY_RENDER_API_KEY }}
