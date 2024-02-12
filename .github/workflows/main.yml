@@ -61,26 +61,44 @@ jobs:
 
   notify:
     runs-on: ubuntu-latest
-    if: always()
+    if: ${{ always() }}
     steps:
       - name: Send Slack notification on success
-        if: needs.run-tests.result == 'success' && needs.deploy.result == 'success'
+        if: ${{ needs.run-tests.result == 'success' && needs.deploy.result == 'success' }}
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          payload: >
+          payload: |
             {
-              "text": "CI/CD process succeeded! All tests and deployment were successful" 
+              "text": "CI/CD process succeeded!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "All tests and deployment were successful."
+                  }
+                }
+              ]
             }
         env:
-          SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Send Slack notification on failure
-        if: needs.run-tests.result != 'success' || needs.deploy.result != 'success'
+        if: ${{ needs.run-tests.result != 'success' || needs.deploy.result != 'success' }}
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          payload: >
+          payload: |
             {
-              "text": "CI/CD process failed! There was a failure in the CI/CD process. Check the workflow for details.\n\nFailed Tests: ${{ needs.run-tests.outputs.test-results-url }}\nFailed Deployment: ${{ needs.deploy.outputs.deployment-url }}"
+              "text": "CI/CD process failed!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "There was a failure in the CI/CD process. Check the workflow for details.\n\nFailed Tests: ${{ needs.run-tests.outputs.steps.run-tests.outputs.test-results-url }}\nFailed Deployment: ${{ needs.deploy.outputs.steps.deploy.outputs.deployment-url }}"
+                  }
+                }
+              ]
             }
         env:
-          SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
