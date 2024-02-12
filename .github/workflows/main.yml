@@ -69,16 +69,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "CI/CD process succeeded!",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "All tests and deployment were successful."
-                  }
-                }
-              ]
+              "text": "CI/CD process succeeded!" 
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -89,16 +80,8 @@ jobs:
         with:
           payload: |
             {
-              "text": "CI/CD process failed!",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "There was a failure in the CI/CD process. Check the workflow for details.\n\nFailed Tests: ${{ needs.run-tests.outputs.steps.run-tests.outputs.test-results-url }}\nFailed Deployment: ${{ needs.deploy.outputs.steps.deploy.outputs.deployment-url }}"
-                  }
-                }
-              ]
+              "text": "CI/CD Workflow *${{ github.workflow }}* failed. Access the details [here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+               
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
