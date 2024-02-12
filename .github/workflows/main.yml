@@ -60,10 +60,8 @@ jobs:
           api-key: ${{ secrets.MY_RENDER_API_KEY }}
 
   notify:
-    needs: [run-tests, deploy]
     runs-on: ubuntu-latest
     if: ${{ always() }}
-
     steps:
       - name: Send Slack notification on success
         if: ${{ needs.run-tests.result == 'success' && needs.deploy.result == 'success' }}
@@ -97,7 +95,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "There was a failure in the CI/CD process. Check the workflow for details.\n\nFailed Tests: ${{ steps.run-tests.outputs.test-results-url }}\nFailed Deployment: ${{ steps.deploy.outputs.deployment-url }}"
+                    "text": "There was a failure in the CI/CD process. Check the workflow for details.\n\nFailed Tests: ${{ needs.run-tests.outputs.test-results-url }}\nFailed Deployment: ${{ needs.deploy.outputs.deployment-url }}"
                   }
                 }
               ]
