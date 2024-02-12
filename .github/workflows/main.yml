@@ -80,7 +80,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "CI/CD Workflow *${{ github.workflow }}* failed. Access the details [here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+              "text": "*${{ github.workflow }}* failed. Access the details https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}."
                
             }
         env:
