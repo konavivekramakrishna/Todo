@@ -60,6 +60,7 @@ jobs:
           api-key: "${{ secrets.MY_RENDER_API_KEY }}"
 
   notify:
+    needs: [run-tests, deploy]
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
