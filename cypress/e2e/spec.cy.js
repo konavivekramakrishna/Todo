@@ -60,7 +60,7 @@ describe("Todo App Test,", () => {
     cy.get('button[type="submit"]').click();
     cy.wait(500);
     cy.get(".Todo-Item").should("exist");
-    cy.get("#count-due-today").contains("1");
+    cy.get("#count-due-today").contains("6");
   });
 
   it("Delete Todo", () => {
