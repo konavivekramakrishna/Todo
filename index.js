@@ -1,7 +1,13 @@
 const app = require("./app");
 
-app.listen(3000, () => {
-  console.log("Started express server at port 3000");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+const portNumber = process.env.PORT;
+
+app.listen(portNumber, () => {
+  console.log(`Started express server at port ${portNumber}`);
 });
 
 // Path: app.js

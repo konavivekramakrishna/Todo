@@ -20,7 +20,7 @@ app.use(
     cookie: {
       maxAge: 24 * 60 * 60 * 100,
     },
-  }),
+  })
 );
 app.use(passport.initialize());
 app.use(passport.session());
@@ -48,8 +48,8 @@ passport.use(
       } catch (err) {
         console.log(err);
       }
-    },
-  ),
+    }
+  )
 );
 
 passport.serializeUser((user, done) => {
@@ -79,7 +79,12 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
+let counter = 0;
+
+// the above indicates noOfGet request made to / path exceptions are not counted
+
 app.get("/", async function (request, response) {
+  console.log("counter : ", counter++);
   if (request.isAuthenticated()) {
     return response.redirect("/todos");
   }
@@ -110,7 +115,7 @@ app.get(
       console.log(err);
       response.status(422).send(err);
     }
-  },
+  }
 );
 
 app.get(
@@ -124,7 +129,7 @@ app.get(
       console.log(error);
       return response.status(422).json(error);
     }
-  },
+  }
 );
 
 app.post(
@@ -148,7 +153,7 @@ app.post(
       // Redirect to the same page or a designated error page
       return response.redirect("/todos"); // You can customize the redirect URL
     }
-  },
+  }
 );
 
 app.put(
@@ -158,14 +163,14 @@ app.put(
     const todo = await Todo.findByPk(request.params.id);
     try {
       const updatedTodo = await todo.setCompletionStatus(
-        request.body.completed,
+        request.body.completed
       );
       return response.json(updatedTodo);
     } catch (error) {
       console.log(error);
       return response.status(422).json(error);
     }
-  },
+  }
 );
 
 app.delete(
@@ -177,14 +182,14 @@ app.delete(
     try {
       const deleteTodo = await Todo.deleteTodo(
         request.params.id,
-        request.user.id,
+        request.user.id
       );
       response.send(deleteTodo ? true : false);
     } catch (err) {
       console.log(err);
       return response.status(422).json(err);
     }
-  },
+  }
 );
 
 app.get("/signup", async function (request, response) {
@@ -248,7 +253,7 @@ app.post(
     console.log(request.user);
     console.log(request.flash("error")); // Print out flash messages
     response.redirect("/todos");
-  },
+  }
 );
 
 app.get("/signout", (req, res, next) => {
