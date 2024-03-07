@@ -3,13 +3,13 @@ WORKDIR /app
 COPY package.json /
 EXPOSE 3000
 
-FROM base as dev
+FROM base as development
 ENV NODE_ENV=development
 RUN npm install -g nodemon && npm install
 COPY . /app
 CMD npm run start
 
-FROM base as prod
+FROM base as production
 ENV NODE_ENV=production
 RUN npm install
 COPY . /app

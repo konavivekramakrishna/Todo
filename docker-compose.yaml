@@ -3,8 +3,8 @@ services:
   app:
     build:
       context: .
-      target: dev
-    image: todo-app:dev
+      target: development
+    image: todo-app:development
     volumes:
       - .:/app
     ports:
