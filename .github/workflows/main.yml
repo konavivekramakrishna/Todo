@@ -87,7 +87,7 @@ jobs:
           file: ./Dockerfile
           push: true
           # Push the image with the latest tag
-          tags: ${{ secrets.DOCKER_USERNAME }}/todo:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/clockbox:latest
 
   deploy:
     needs: build-and-push
