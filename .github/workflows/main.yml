@@ -49,11 +49,12 @@ jobs:
       # Run the app
       - name: Run the app
         id: run-app
+         - name: Run the app (test environment)
         run: |
-          npx sequelize-cli db:drop
-          npx sequelize-cli db:create
-          npx sequelize-cli db:migrate
-          PORT=3000 npm start &
+          npx sequelize-cli db:drop --env=test
+          npx sequelize-cli db:create --env=test
+          npx sequelize-cli db:migrate --env=test
+          PORT=3000 NODE_ENV=test npm start &
           sleep 5
       # Run integration tests
       - name: Run integration tests
