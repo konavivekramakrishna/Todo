@@ -7,7 +7,6 @@ const passport = require("passport");
 const connectEnsureLogin = require("connect-ensure-login");
 const session = require("express-session");
 const localStrategey = require("passport-local");
-const bcrypt = require("bcrypt");
 const flash = require("connect-flash");
 
 const saltRounds = 10;
@@ -35,7 +34,7 @@ passport.use(
       try {
         User.findOne({ where: { email: username } })
           .then(async function (user) {
-            const result = await bcrypt.compare(password, user.password);
+            const result = password === user.password;
             if (result) {
               return done(null, user);
             } else {
@@ -207,14 +206,13 @@ app.post("/users", async function (request, response) {
     return response.redirect("/signup"); // You can customize the redirect URL
   }
 
-  const hashpass = await bcrypt.hash(password, saltRounds);
-
+  
   try {
     const user = await User.create({
       firstName: firstName,
       lastName: lastName,
       email: email,
-      password: hashpass,
+      password: password,
     });
 
     console.log("User created:", user);

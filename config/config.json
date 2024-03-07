@@ -3,7 +3,7 @@
     "username": "postgres",
     "password": "postgres",
     "database": "wd-todo-dev",
-    "host": "127.0.0.1",
+    "host": "db",
     "dialect": "postgres",
     "logging": false
   },
@@ -11,7 +11,7 @@
     "username": "postgres",
     "password": "postgres",
     "database": "wd-todo-test",
-    "host": "127.0.0.1",
+    "host": "db",
     "dialect": "postgres",
     "logging": false
   },

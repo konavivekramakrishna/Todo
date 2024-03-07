@@ -61,14 +61,37 @@ jobs:
           npm install cypress cypress-json-results
           npx cypress run
 
-  # Job to deploy the app to production
-  deploy:
-    # Define the job dependencies
-    needs: run-tests
+  build-and-push:
     runs-on: ubuntu-latest
-    if: needs.run-tests.result == 'success'
+    needs: run-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Steps to execute within the job
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          # Docker Hub username
+          username: ${{ secrets.DOCKER_USERNAME }}
+          # Docker Hub password
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          # Push the image with the latest tag
+          tags: ${{ secrets.DOCKER_USERNAME }}/todo:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: needs.build-and-push.result == 'success'
     steps:
       # Deploy to production using a custom action
       - name: Deploy to production
@@ -82,7 +105,6 @@ jobs:
     # Define the job dependencies
     needs: [run-tests, deploy]
     runs-on: ubuntu-latest
-
     if: ${{ always() }}
     steps:
       - name: Send Slack notification on success
