@@ -82,17 +82,6 @@ let counter = 0;
 
 // the above indicates noOfGet request made to / path exceptions are not counted
 
-app.get("/", async function (request, response) {
-  console.log("counter : ", counter++);
-  if (request.isAuthenticated()) {
-    return response.redirect("/todos");
-  }
-
-  response.render("index", {
-    title: "Todo application",
-  });
-});
-
 app.get(
   "/todos",
   connectEnsureLogin.ensureLoggedIn(),
@@ -116,6 +105,19 @@ app.get(
     }
   }
 );
+
+
+app.get("/", async function (request, response) {
+  console.log("counter : ", counter++);
+  if (request.isAuthenticated()) {
+    return response.redirect("/todos");
+  }
+
+  response.render("index", {
+    title: "Todo application",
+  });
+});
+
 
 app.get(
   "/todos/:id",
@@ -155,6 +157,17 @@ app.post(
   }
 );
 
+app.get("/signout", (req, res, next) => {
+  req.logOut((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
+module.exports = app;
+
+
 app.put(
   "/todos/:id",
   connectEnsureLogin.ensureLoggedIn(),
@@ -171,6 +184,14 @@ app.put(
     }
   }
 );
+
+
+
+// test
+
+app.get("/signup", async function (request, response) {
+  response.render("signup", { title: "signup" });
+});
 
 app.delete(
   "/todos/:id",
@@ -191,11 +212,24 @@ app.delete(
   }
 );
 
-// test
 
-app.get("/signup", async function (request, response) {
-  response.render("signup", { title: "signup" });
+app.get("/login", (request, response) => {
+  response.render("login", { title: "Login" });
 });
+
+app.post(
+  "/sessions",
+  passport.authenticate("local", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  function (request, response) {
+    console.log(request.user);
+    console.log(request.flash("error")); // Print out flash messages
+    response.redirect("/todos");
+  }
+);
+
 app.post("/users", async function (request, response) {
   const { firstName, lastName, email, password } = request.body;
 
@@ -239,29 +273,4 @@ app.post("/users", async function (request, response) {
   }
 });
 
-app.get("/login", (request, response) => {
-  response.render("login", { title: "Login" });
-});
 
-app.post(
-  "/sessions",
-  passport.authenticate("local", {
-    failureRedirect: "/login",
-    failureFlash: true,
-  }),
-  function (request, response) {
-    console.log(request.user);
-    console.log(request.flash("error")); // Print out flash messages
-    response.redirect("/todos");
-  }
-);
-
-app.get("/signout", (req, res, next) => {
-  req.logOut((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.redirect("/");
-  });
-});
-module.exports = app;
