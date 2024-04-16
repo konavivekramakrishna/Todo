@@ -24,6 +24,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// sample comment for workflow testing
+
 passport.use(
   new localStrategey(
     {
