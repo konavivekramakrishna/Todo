@@ -85,7 +85,84 @@ app.use(express.static(path.join(__dirname, "public")));
 let counter = 0;
 
 // the above indicates noOfGet request made to / path exceptions are not counted
+ 
+app.get(
+  "/todos",
+  connectEnsureLogin.ensureLoggedIn(),
+  async function (request, response) {
+    console.log("Processing list of all Todos ...");
+    // FILL IN YOUR CODE HERE
+    try {
+      const overdues = await Todo.overdue(request.user.id);
+      const todaydues = await Todo.todaydue(request.user.id);
+      const laterdues = await Todo.laterdue(request.user.id);
+      const comptodos = await Todo.completedtodos(request.user.id);
+      console.log(overdues, todaydues, laterdues, comptodos);
+      if (request.accepts("html")) {
+        response.render("todos", { overdues, todaydues, laterdues, comptodos });
+      } else {
+        return response.json({ overdues, todaydues, laterdues, comptodos });
+      }
+    } catch (err) {
+      console.log(err);
+      response.status(422).send(err);
+    }
+  }
+);
 
+
+app.get("/", async function (request, response) {
+  console.log("counter : ", counter++);
+  if (request.isAuthenticated()) {
+    return response.redirect("/todos");
+  }
+
+  response.render("index", {
+    title: "Todo application",
+  });
+});
+
+
+app.get(
+  "/todos/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async function (request, response) {
+    try {
+      const todo = await Todo.findByPk(request.params.id);
+      return response.json(todo);
+    } catch (error) {
+      console.log(error);
+      return response.status(422).json(error);
+    }
+  }
+);
+
+app.post(
+  "/todos",
+  connectEnsureLogin.ensureLoggedIn(),
+  async function (request, response) {
+    console.log("hii", request.user);
+    try {
+      const todo = await Todo.addTodo(request.body, request.user.id);
+      if (request.accepts("html")) {
+        return response.redirect("/todos");
+      } else {
+        return response.json(todo);
+      }
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+ 
+
+
+app.get("/signout", (req, res, next) => {
+  req.logOut((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
+module.exports = app;
 
 
 app.put(
@@ -104,6 +181,14 @@ app.put(
     }
   }
 );
+
+
+
+// test
+
+app.get("/signup", async function (request, response) {
+  response.render("signup", { title: "signup" });
+});
 
 app.delete(
   "/todos/:id",
@@ -124,6 +209,7 @@ app.delete(
   }
 );
 
+ 
 
 app.get("/", async function (request, response) {
   console.log("counter : ", counter++);
@@ -149,10 +235,25 @@ app.get(
     }
   }
 );
+ 
 
-app.get("/signup", async function (request, response) {
-  response.render("signup", { title: "signup" });
+app.get("/login", (request, response) => {
+  response.render("login", { title: "Login" });
 });
+
+app.post(
+  "/sessions",
+  passport.authenticate("local", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  function (request, response) {
+    console.log(request.user);
+    console.log(request.flash("error")); // Print out flash messages
+    response.redirect("/todos");
+  }
+);
+
 app.post("/users", async function (request, response) {
   const { firstName, lastName, email, password } = request.body;
 
@@ -196,10 +297,8 @@ app.post("/users", async function (request, response) {
   }
 });
 
-app.get("/login", (request, response) => {
-  response.render("login", { title: "Login" });
-});
 
+ 
 app.post(
   "/sessions",
   passport.authenticate("local", {
@@ -275,4 +374,4 @@ app.get(
 
 
 // test
-
+ 
